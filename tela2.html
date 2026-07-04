@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letreiro de recados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070912;
+    --bg2:#03040a;
+    --pink:#ff3d8a;
+    --cyan:#33e6ff;
+    --amber:#ffc94d;
+    --glow:#fdefe0;
+    --muted:#4a5266;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:radial-gradient(circle at 50% 30%, var(--bg) 0%, var(--bg2) 75%);
+    color:var(--glow);
+    font-family:'Space Grotesk', sans-serif;
+    overflow:hidden;
+  }
+
+  /* ---------- TELA DE SENHA ---------- */
+  #gate{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg2);
+    z-index:50;
+  }
+  .gate-card{ width:100%; max-width:340px; padding:0 24px; text-align:center; }
+  .gate-eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--cyan); margin-bottom:10px;
+  }
+  .gate-card h1{
+    font-family:'Monoton', cursive; font-weight:400;
+    font-size:24px; letter-spacing:.04em; margin:0 0 26px; color:var(--pink);
+    text-shadow:0 0 12px rgba(255,61,138,0.6);
+  }
+  #senha{
+    width:100%; padding:13px 14px; border-radius:8px;
+    border:1px solid rgba(253,239,224,0.18);
+    background:rgba(253,239,224,0.05);
+    color:var(--glow); font-size:15px; text-align:center;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  #senha:focus{outline:none; border-color:var(--cyan);}
+  #entrar{
+    width:100%; margin-top:12px; padding:13px; border:none; border-radius:8px;
+    background:var(--cyan); color:#03131a; font-weight:700; font-size:14.5px;
+    cursor:pointer;
+  }
+  #gateErro{
+    margin-top:12px; font-size:12.5px; color:var(--pink);
+    font-family:'JetBrains Mono', monospace; min-height:14px;
+  }
+
+  /* ---------- PALCO ---------- */
+  #palco{
+    position:fixed; inset:0;
+    display:none;
+    align-items:center; justify-content:center;
+  }
+
+  #idle{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--muted);
+    display:flex; align-items:center; gap:10px;
+  }
+  #idle::before{
+    content:""; width:6px; height:6px; border-radius:50%;
+    background:var(--muted); animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.25;}50%{opacity:.9;}}
+
+  /* ---------- MOLDURA DE LÂMPADAS ---------- */
+  #sign{
+    position:relative;
+    opacity:0;
+    transform:scale(0.94);
+    transition:opacity .25s linear, transform .4s ease;
+  }
+  #sign.on{opacity:1; transform:scale(1);}
+
+  #bulbFrame{
+    position:absolute; inset:-22px;
+    pointer-events:none;
+  }
+  .bulb{
+    position:absolute;
+    width:9px; height:9px;
+    margin:-4.5px 0 0 -4.5px;
+    border-radius:50%;
+    background:var(--muted);
+    box-shadow:none;
+  }
+  .bulb.pink{ --bulb-color: var(--pink); }
+  .bulb.cyan{ --bulb-color: var(--cyan); }
+  .bulb.amber{ --bulb-color: var(--amber); }
+
+  #sign.on .bulb{
+    animation:chase 1.2s linear infinite;
+    animation-delay: var(--d);
+  }
+  @keyframes chase{
+    0%, 80%, 100%{ background:var(--muted); box-shadow:none; }
+    10%, 30%{ background:var(--bulb-color); box-shadow:0 0 8px 2px var(--bulb-color); }
+  }
+
+  #sign.off .bulb{
+    animation:flickerOff .7s steps(6,end) forwards;
+    animation-delay: calc(var(--d) * 0.15);
+  }
+  @keyframes flickerOff{
+    0%{ background:var(--bulb-color); box-shadow:0 0 8px 2px var(--bulb-color); }
+    50%{ background:var(--muted); box-shadow:none; }
+    60%{ background:var(--bulb-color); box-shadow:0 0 8px 2px var(--bulb-color); }
+    100%{ background:var(--muted); box-shadow:none; }
+  }
+
+  /* ---------- PAINEL ---------- */
+  .panel{
+    position:relative;
+    background:linear-gradient(180deg, #0d0f18, #08090f);
+    border-radius:14px;
+    padding:46px 52px;
+    max-width:min(78vw, 680px);
+    text-align:center;
+    box-shadow:inset 0 0 0 1px rgba(253,239,224,0.06), 0 30px 90px -20px rgba(0,0,0,0.8);
+    opacity:0;
+    filter:brightness(0.4);
+    transition:opacity .15s, filter .15s;
+  }
+  #sign.on .panel{
+    animation:panelFlicker .9s steps(10,end) forwards;
+  }
+  @keyframes panelFlicker{
+    0%{opacity:0; filter:brightness(0.3);}
+    20%{opacity:1; filter:brightness(1.1);}
+    35%{opacity:.3; filter:brightness(0.3);}
+    50%{opacity:1; filter:brightness(1.15);}
+    65%{opacity:.5; filter:brightness(0.4);}
+    100%{opacity:1; filter:brightness(1);}
+  }
+
+  .eyebrow-sign{
+    font-family:'Monoton', cursive;
+    font-size:13px; letter-spacing:.15em; text-transform:uppercase;
+    color:var(--cyan);
+    text-shadow:0 0 10px rgba(51,230,255,0.7);
+    margin-bottom:18px;
+  }
+  #msgTexto{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(22px, 3.2vw, 32px);
+    line-height:1.35;
+    margin:0;
+    text-shadow:0 0 18px rgba(253,239,224,0.35);
+    word-wrap:break-word;
+  }
+  #msgFoto{
+    display:none;
+    max-width:100%;
+    max-height:64vh;
+    border-radius:6px;
+    box-shadow:0 0 30px rgba(255,201,77,0.15);
+  }
+
+  #timerWrap{
+    margin-top:28px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  #timerWrap svg{transform:rotate(-90deg);}
+  #timerNum{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px; color:var(--muted); letter-spacing:.05em;
+  }
+</style>
+</head>
+<body>
+
+  <div id="gate">
+    <div class="gate-card">
+      <div class="gate-eyebrow">Acesso restrito</div>
+      <h1>NO AR</h1>
+      <input type="password" id="senha" placeholder="Senha" autocomplete="off">
+      <button id="entrar">Entrar</button>
+      <div id="gateErro"></div>
+    </div>
+  </div>
+
+  <div id="palco">
+    <div id="idle">Sem sinal</div>
+
+    <div id="sign">
+      <div id="bulbFrame"></div>
+      <div class="panel">
+        <div class="eyebrow-sign">No ar</div>
+        <p id="msgTexto"></p>
+        <img id="msgFoto">
+        <div id="timerWrap">
+          <svg width="20" height="20" viewBox="0 0 22 22">
+            <circle cx="11" cy="11" r="9" fill="none" stroke="rgba(253,239,224,0.12)" stroke-width="2.5"/>
+            <circle id="ring" cx="11" cy="11" r="9" fill="none" stroke="#33e6ff" stroke-width="2.5"
+              stroke-dasharray="56.5" stroke-dashoffset="0" stroke-linecap="round"/>
+          </svg>
+          <span id="timerNum">20s</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+  const SENHA_CORRETA = "praviversempedirlicença";
+
+  const gate = document.getElementById('gate');
+  const palco = document.getElementById('palco');
+  const senhaInput = document.getElementById('senha');
+  const gateErro = document.getElementById('gateErro');
+
+  function tentarEntrar(){
+    if (senhaInput.value === SENHA_CORRETA){
+      gate.style.display = 'none';
+      palco.style.display = 'flex';
+      sessionStorage.setItem('tela2_autenticada', '1');
+      iniciarEscuta();
+    } else {
+      gateErro.textContent = 'Senha incorreta.';
+      senhaInput.value = '';
+    }
+  }
+
+  document.getElementById('entrar').addEventListener('click', tentarEntrar);
+  senhaInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tentarEntrar(); });
+
+  if (sessionStorage.getItem('tela2_autenticada') === '1'){
+    gate.style.display = 'none';
+    palco.style.display = 'flex';
+    iniciarEscuta();
+  }
+
+  // ---------- GERA AS LÂMPADAS DA MOLDURA ----------
+  const bulbFrame = document.getElementById('bulbFrame');
+  const cores = ['pink', 'cyan', 'amber'];
+  const N = 32;
+
+  function pontoNoPerimetro(t){
+    // t de 0 a 1, anda ao redor de um retângulo (percentual do frame)
+    const perim = 2 * (100 + 60); // largura% + altura% aproximado (proporção)
+    const w = 100, h = 60;
+    let d = t * (2 * (w + h));
+    if (d < w) return { x: d, y: 0 };
+    d -= w;
+    if (d < h) return { x: w, y: d };
+    d -= h;
+    if (d < w) return { x: w - d, y: h };
+    d -= w;
+    return { x: 0, y: h - d };
+  }
+
+  for (let i = 0; i < N; i++){
+    const t = i / N;
+    const p = pontoNoPerimetro(t);
+    const bulb = document.createElement('div');
+    bulb.className = 'bulb ' + cores[i % cores.length];
+    bulb.style.left = p.x + '%';
+    bulb.style.top = p.y + '%';
+    bulb.style.setProperty('--d', (t * 1.2) + 's');
+    bulbFrame.appendChild(bulb);
+  }
+
+  // ---------- LÓGICA DE EXIBIÇÃO ----------
+  let jaEscutando = false;
+  let ultimoIdMostrado = localStorage.getItem('ultimo_recado_id_tela2') || null;
+
+  function iniciarEscuta(){
+    if (jaEscutando) return;
+    jaEscutando = true;
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    db.collection('recados').doc('atual').onSnapshot((doc) => {
+      if (!doc.exists) return;
+      const data = doc.data();
+      if (!data || !data.id) return;
+      if (data.id === ultimoIdMostrado) return;
+
+      ultimoIdMostrado = data.id;
+      localStorage.setItem('ultimo_recado_id_tela2', data.id);
+      mostrarRecado(data);
+    });
+  }
+
+  const idleEl = document.getElementById('idle');
+  const signEl = document.getElementById('sign');
+  const msgTexto = document.getElementById('msgTexto');
+  const msgFoto = document.getElementById('msgFoto');
+  const ring = document.getElementById('ring');
+  const timerNum = document.getElementById('timerNum');
+
+  let emExibicao = false;
+  let filaProxima = null;
+
+  function mostrarRecado(data){
+    if (emExibicao){ filaProxima = data; return; }
+    emExibicao = true;
+    idleEl.style.display = 'none';
+
+    if (data.tipo === 'texto'){
+      msgTexto.style.display = 'block';
+      msgFoto.style.display = 'none';
+      msgTexto.textContent = data.conteudo;
+    } else {
+      msgTexto.style.display = 'none';
+      msgFoto.style.display = 'block';
+      msgFoto.src = data.conteudo;
+    }
+
+    signEl.classList.remove('off');
+    signEl.classList.add('on');
+
+    // countdown 20s
+    const total = 20;
+    let restante = total;
+    timerNum.textContent = restante + 's';
+    ring.style.strokeDashoffset = '0';
+
+    const circunferencia = 56.5;
+    const intervalo = setInterval(() => {
+      restante -= 1;
+      timerNum.textContent = Math.max(restante, 0) + 's';
+      const offset = circunferencia * (1 - restante / total);
+      ring.style.strokeDashoffset = offset;
+      if (restante <= 0){
+        clearInterval(intervalo);
+        esconderRecado();
+      }
+    }, 1000);
+  }
+
+  function esconderRecado(){
+    signEl.classList.remove('on');
+    signEl.classList.add('off');
+
+    setTimeout(() => {
+      signEl.classList.remove('off');
+      idleEl.style.display = 'flex';
+      emExibicao = false;
+      if (filaProxima){
+        const prox = filaProxima;
+        filaProxima = null;
+        setTimeout(() => mostrarRecado(prox), 400);
+      }
+    }, 750);
+  }
+</script>
+</body>
+</html>
