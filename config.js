@@ -36,5 +36,5 @@
 // 6. Cole os dois valores abaixo, substituindo "COLE_AQUI".
 // ============================================================
 
-const SUPABASE_URL = "https://zlkmmstcslvqimuxjmko.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://zlkmmstcslvqimuxjmko.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_bB6ATsXg69R9P1ETWEukTw_hY4heP7J";
