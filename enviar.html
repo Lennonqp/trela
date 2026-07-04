@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recado anônimo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#120B0E;
+    --bg-glow: radial-gradient(circle at 50% 0%, #2a1610 0%, #120B0E 55%);
+    --paper:#EDE6D6;
+    --amber:#E8933A;
+    --amber-dim:#8a5a26;
+    --velvet:#5c1f1f;
+    --muted:#9c8f80;
+    --text:#EDE6D6;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg-glow);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:24px;
+  }
+  .stage{
+    width:100%;
+    max-width:460px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--amber);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px;height:7px;border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 8px 2px var(--amber);
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(28px, 6vw, 38px);
+    line-height:1.1;
+    margin:0 0 8px;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:14.5px;
+    margin-bottom:32px;
+    line-height:1.5;
+  }
+  .card{
+    background:rgba(237,230,214,0.04);
+    border:1px solid rgba(237,230,214,0.14);
+    border-radius:14px;
+    padding:22px;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:18px;
+    background:rgba(0,0,0,0.25);
+    padding:4px;
+    border-radius:10px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:10px 8px;
+    font-size:13.5px;
+    font-weight:500;
+    border-radius:8px;
+    cursor:pointer;
+    color:var(--muted);
+    transition:all .2s ease;
+    user-select:none;
+  }
+  .tab.active{
+    background:var(--amber);
+    color:#1a1108;
+  }
+  textarea{
+    width:100%;
+    min-height:120px;
+    resize:vertical;
+    background:rgba(0,0,0,0.25);
+    border:1px solid rgba(237,230,214,0.14);
+    border-radius:10px;
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    padding:14px;
+    line-height:1.5;
+  }
+  textarea:focus, .drop:focus-within{
+    outline:none;
+    border-color:var(--amber);
+  }
+  textarea::placeholder{color:#6b6055;}
+  .counter{
+    text-align:right;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--muted);
+    margin-top:6px;
+  }
+  .drop{
+    border:1.5px dashed rgba(237,230,214,0.25);
+    border-radius:10px;
+    padding:26px 16px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease;
+    position:relative;
+  }
+  .drop:hover{border-color:var(--amber-dim); background:rgba(232,147,58,0.05);}
+  .drop input{
+    position:absolute; inset:0; opacity:0; cursor:pointer;
+  }
+  .drop-label{font-size:13.5px; color:var(--muted);}
+  .drop-label b{color:var(--text); font-weight:500;}
+  #preview{
+    max-width:100%;
+    max-height:220px;
+    border-radius:8px;
+    display:none;
+    margin:0 auto 10px;
+  }
+  button.send{
+    width:100%;
+    margin-top:18px;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:var(--amber);
+    color:#1a1108;
+    font-weight:600;
+    font-size:15px;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    box-shadow:0 6px 20px -6px rgba(232,147,58,0.5);
+  }
+  button.send:hover{transform:translateY(-1px);}
+  button.send:disabled{opacity:.5; cursor:not-allowed; transform:none;}
+  .status{
+    margin-top:14px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    text-align:center;
+    min-height:16px;
+    color:var(--muted);
+  }
+  .status.ok{color:#7fbf7f;}
+  .status.err{color:#d97a7a;}
+  .hint{
+    text-align:center;
+    margin-top:22px;
+    font-size:12px;
+    color:#6b6055;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;}
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="eyebrow">Recado anônimo</div>
+    <h1>Solte o que<br>você não diria de cara.</h1>
+    <p class="sub">Escreva um recado ou envie uma foto. Ele vai aparecer na tela por 10 segundos — e depois some. Ninguém sabe quem enviou.</p>
+
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-tab="texto">Texto</div>
+        <div class="tab" data-tab="foto">Foto</div>
+      </div>
+
+      <div class="panel active" id="panel-texto">
+        <textarea id="texto" maxlength="280" placeholder="Escreva seu recado anônimo aqui..."></textarea>
+        <div class="counter"><span id="count">0</span>/280</div>
+      </div>
+
+      <div class="panel" id="panel-foto">
+        <img id="preview">
+        <label class="drop">
+          <input type="file" id="foto" accept="image/*">
+          <div class="drop-label"><b>Toque para escolher uma foto</b><br>ou arraste aqui</div>
+        </label>
+      </div>
+
+      <button class="send" id="btnSend">Enviar recado</button>
+      <div class="status" id="status"></div>
+    </div>
+
+    <p class="hint">O recado é exibido uma única vez, em uma tela separada, por 10 segundos.</p>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const tabs = document.querySelectorAll('.tab');
+  const panels = {texto: document.getElementById('panel-texto'), foto: document.getElementById('panel-foto')};
+  let currentTab = 'texto';
+
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    Object.values(panels).forEach(p => p.classList.remove('active'));
+    currentTab = t.dataset.tab;
+    panels[currentTab].classList.add('active');
+  }));
+
+  const textoEl = document.getElementById('texto');
+  const countEl = document.getElementById('count');
+  textoEl.addEventListener('input', () => countEl.textContent = textoEl.value.length);
+
+  const fotoInput = document.getElementById('foto');
+  const preview = document.getElementById('preview');
+  let fotoBase64 = null;
+
+  fotoInput.addEventListener('change', () => {
+    const file = fotoInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // Redimensiona/comprime para a foto não ficar pesada demais
+        const maxW = 1000;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        fotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        preview.src = fotoBase64;
+        preview.style.display = 'block';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  const btn = document.getElementById('btnSend');
+  const statusEl = document.getElementById('status');
+
+  function setStatus(msg, cls){
+    statusEl.textContent = msg;
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+  }
+
+  btn.addEventListener('click', async () => {
+    let payload = null;
+
+    if (currentTab === 'texto') {
+      const val = textoEl.value.trim();
+      if (!val) { setStatus('Escreva alguma coisa antes de enviar.', 'err'); return; }
+      payload = { tipo: 'texto', conteudo: val };
+    } else {
+      if (!fotoBase64) { setStatus('Escolha uma foto antes de enviar.', 'err'); return; }
+      payload = { tipo: 'foto', conteudo: fotoBase64 };
+    }
+
+    btn.disabled = true;
+    setStatus('Enviando...', '');
+
+    try {
+      const { error } = await sb.from('recados').insert(payload);
+      if (error) throw error;
+      setStatus('Recado enviado! Já deve estar aparecendo na tela.', 'ok');
+      textoEl.value = '';
+      countEl.textContent = '0';
+      fotoBase64 = null;
+      preview.style.display = 'none';
+      fotoInput.value = '';
+    } catch (err) {
+      console.error(err);
+      setStatus('Erro ao enviar. Confira a configuração do Supabase.', 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
