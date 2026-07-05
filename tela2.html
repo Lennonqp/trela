@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(139,92,246,0.35), transparent 55%),
+      radial-gradient(circle at 85% 80%, rgba(255,122,51,0.30), transparent 55%),
+      #160B2E;
+    color:#FFF6EC;
+    font-family:'Plus Jakarta Sans', sans-serif;
+    overflow:hidden;
+  }
+
+  /* ---------- BLOBS AMBIENTE ---------- */
+  .blob{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(60px);
+    opacity:.55;
+    z-index:0;
+    pointer-events:none;
+  }
+  .blob1{ width:38vw; height:38vw; top:-10%; left:-8%; background:#8B5CF6; animation:drift1 18s ease-in-out infinite; }
+  .blob2{ width:30vw; height:30vw; bottom:-12%; right:-6%; background:#FF7A33; animation:drift2 22s ease-in-out infinite; }
+  @keyframes drift1{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(4%, 6%);} }
+  @keyframes drift2{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(-5%, -4%);} }
+
+  /* ---------- GATE ---------- */
+  #gate{
+    position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    z-index:50;
+  }
+  .gate-card{ width:100%; max-width:340px; padding:0 24px; text-align:center; position:relative; z-index:1; }
+  .gate-eyebrow{
+    display:inline-block;
+    font-family:'Unbounded', sans-serif; font-weight:700;
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+    color:#160B2E; background:#FFB238;
+    padding:5px 12px; border-radius:100px; margin-bottom:16px;
+  }
+  .gate-card h1{
+    font-family:'Unbounded', sans-serif; font-weight:800;
+    font-size:26px; margin:0 0 26px; line-height:1.25;
+    color:#FFB238; /* cor sólida de reserva, caso a TV não suporte texto em degradê */
+  }
+  @supports ((-webkit-background-clip:text) or (background-clip:text)){
+    .gate-card h1{
+      background:linear-gradient(90deg, #FFB238, #8B5CF6);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+  }
+  #senha{
+    width:100%; padding:14px; border-radius:100px;
+    border:1.5px solid rgba(255,246,236,0.18);
+    background:rgba(255,246,236,0.06);
+    color:#FFF6EC; font-size:15px; text-align:center;
+    font-family:'Plus Jakarta Sans', sans-serif; font-weight:600;
+  }
+  #senha::placeholder{color:#7A6C9C;}
+  #senha:focus{outline:none; border-color:#FF7A33;}
+  #entrar{
+    width:100%; margin-top:12px; padding:14px; border:none; border-radius:100px;
+    background:linear-gradient(90deg, #FF7A33, #8B5CF6);
+    color:#FFF6EC; font-weight:700; font-size:14.5px;
+    font-family:'Plus Jakarta Sans', sans-serif;
+    cursor:pointer;
+  }
+  #gateErro{
+    margin-top:12px; font-size:12.5px; color:#FFB238; font-weight:600;
+    min-height:14px;
+  }
+
+  /* ---------- PALCO ---------- */
+  #palco{
+    position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%;
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:1;
+  }
+
+  #idle{
+    display:flex; align-items:center; gap:9px;
+    font-weight:600; font-size:13px; letter-spacing:.02em;
+    color:#7A6C9C;
+    background:rgba(255,246,236,0.05);
+    padding:10px 18px; border-radius:100px;
+    border:1px solid rgba(255,246,236,0.08);
+  }
+  #idle::before{
+    content:""; width:7px; height:7px; border-radius:50%;
+    background:#FF7A33; animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+
+  /* ---------- CARD ---------- */
+  #cardWrap{
+    position:relative;
+    display:none;
+    max-width:620px;
+    max-width:min(82vw, 620px);
+  }
+  #cardWrap.show{display:block;}
+
+  .sparkle{
+    position:absolute;
+    width:16px; height:16px;
+    opacity:0;
+    animation:twinkle 2.4s ease-in-out infinite;
+  }
+  @keyframes twinkle{0%,100%{opacity:0; transform:scale(.5) rotate(0deg);}50%{opacity:1; transform:scale(1) rotate(20deg);}}
+  .s1{top:-14px; left:-10px; animation-delay:.1s;}
+  .s2{top:-20px; right:18%; animation-delay:.9s;}
+  .s3{bottom:-12px; right:-12px; animation-delay:.5s;}
+  .s4{bottom:22%; left:-18px; animation-delay:1.4s;}
+
+  #card{
+    position:relative;
+    background:linear-gradient(160deg, #2A1650, #1C0F38);
+    border:1.5px solid rgba(255,246,236,0.1);
+    border-radius:28px;
+    padding:8px;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.15);
+    transform:scale(.4) rotate(-4deg);
+    opacity:0;
+  }
+  #cardWrap.show #card{
+    animation:popIn .55s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  #cardWrap.hide #card{
+    animation:popOut .35s ease-in forwards;
+  }
+  @keyframes popIn{
+    0%{ transform:scale(.4) rotate(-4deg); opacity:0; }
+    60%{ transform:scale(1.04) rotate(1deg); opacity:1; }
+    100%{ transform:scale(1) rotate(0deg); opacity:1; }
+  }
+  @keyframes popOut{
+    0%{ transform:scale(1) rotate(0deg); opacity:1; }
+    100%{ transform:scale(.85) rotate(3deg); opacity:0; }
+  }
+
+  #progressTrack{
+    height:6px; border-radius:100px;
+    background:rgba(255,246,236,0.1);
+    margin:10px 10px 0;
+    overflow:hidden;
+  }
+  #progressBar{
+    height:100%; width:100%;
+    border-radius:100px;
+    background:linear-gradient(90deg, #FF7A33, #8B5CF6);
+    transform-origin:left;
+  }
+
+  .card-inner{
+    padding:38px 34px 32px;
+    text-align:center;
+  }
+  .eyebrow-card{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'Unbounded', sans-serif; font-weight:700;
+    font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    color:#160B2E;
+    background:#FFB238;
+    padding:6px 14px; border-radius:100px;
+    margin-bottom:20px;
+  }
+  #msgTexto{
+    font-family:'Plus Jakarta Sans', sans-serif;
+    font-weight:700;
+    font-size:26px;
+    font-size:clamp(21px, 3.2vw, 30px);
+    line-height:1.4;
+    margin:0;
+    color:#FFF6EC;
+    word-wrap:break-word;
+  }
+  #msgFoto{
+    display:none;
+    max-width:100%;
+    max-height:60vh;
+    border-radius:16px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+
+  <div id="gate">
+    <div class="gate-card">
+      <div class="gate-eyebrow">Acesso restrito</div>
+      <h1>Recados do bar</h1>
+      <input type="password" id="senha" placeholder="Senha" autocomplete="off">
+      <button id="entrar">Entrar</button>
+      <div id="gateErro"></div>
+    </div>
+  </div>
+
+  <div id="palco">
+    <div id="idle">Sem recados por enquanto</div>
+
+    <div id="cardWrap">
+      <svg class="sparkle s1" viewBox="0 0 24 24" fill="#FFB238"><path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z"/></svg>
+      <svg class="sparkle s2" viewBox="0 0 24 24" fill="#8B5CF6"><path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z"/></svg>
+      <svg class="sparkle s3" viewBox="0 0 24 24" fill="#FF7A33"><path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z"/></svg>
+      <svg class="sparkle s4" viewBox="0 0 24 24" fill="#8B5CF6"><path d="M12 0 L14 10 L24 12 L14 14 L12 24 L10 14 L0 12 L10 10 Z"/></svg>
+
+      <div id="card">
+        <div id="progressTrack"><div id="progressBar"></div></div>
+        <div class="card-inner">
+          <div class="eyebrow-card">✦ recado novo</div>
+          <p id="msgTexto"></p>
+          <img id="msgFoto">
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  const SENHA_CORRETA = "praviversempedirlicença";
+
+  const gate = document.getElementById('gate');
+  const palco = document.getElementById('palco');
+  const senhaInput = document.getElementById('senha');
+  const gateErro = document.getElementById('gateErro');
+
+  function tentarEntrar(){
+    if (senhaInput.value === SENHA_CORRETA){
+      gate.style.display = 'none';
+      palco.style.display = 'flex';
+      sessionStorage.setItem('tela2_autenticada', '1');
+      iniciarEscuta();
+    } else {
+      gateErro.textContent = 'Senha incorreta.';
+      senhaInput.value = '';
+    }
+  }
+
+  document.getElementById('entrar').addEventListener('click', tentarEntrar);
+  senhaInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tentarEntrar(); });
+
+  if (sessionStorage.getItem('tela2_autenticada') === '1'){
+    gate.style.display = 'none';
+    palco.style.display = 'flex';
+    iniciarEscuta();
+  }
+
+  // ---------- LÓGICA DE EXIBIÇÃO ----------
+  // Fila real (array), não uma única "próxima" — assim, se vários recados
+  // chegarem enquanto um já está na tela, TODOS entram na fila e são
+  // exibidos em ordem, um depois do outro, sem pular nenhum.
+  let jaEscutando = false;
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let fila = [];
+  const vistos = new Set(); // ids já enfileirados/exibidos, pra nunca duplicar
+  let baselineId = 0; // id mais recente que já existia quando a tela foi aberta
+
+  async function iniciarEscuta(){
+    if (jaEscutando) return;
+    jaEscutando = true;
+
+    // Antes de começar a ouvir, marca o recado mais recente que já existe
+    // no banco como "ponto de partida" fixo, pra tela não exibir de uma vez
+    // todo o histórico antigo assim que é aberta.
+    try {
+      const { data } = await sb.from('recados').select('id').order('id', { ascending: false }).limit(1);
+      if (data && data.length) baselineId = data[0].id;
+    } catch (e) { console.error('Falha ao buscar último id', e); }
+
+    sb.channel('recados-tela2')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'recados' }, (payload) => {
+        enfileirar(payload.new);
+      })
+      .subscribe((status) => {
+        // Sempre que a conexão em tempo real (re)conecta, faz uma
+        // varredura pra buscar qualquer recado que possa ter chegado
+        // enquanto a conexão estava caindo/reconectando.
+        if (status === 'SUBSCRIBED') buscarPendentes();
+      });
+
+    // Varredura de segurança periódica: garante que nenhum recado fique
+    // pra trás mesmo se a TV perder a conexão em tempo real por um instante
+    // (comum quando várias pessoas mandam recado ao mesmo tempo pelo celular).
+    // Sempre busca a partir do mesmo ponto de partida fixo (baselineId) e
+    // deixa o Set "vistos" filtrar o que já foi enfileirado — assim, mesmo
+    // que um recado chegue fora de ordem, ele nunca fica pra trás de vez.
+    setInterval(buscarPendentes, 4000);
+  }
+
+  async function buscarPendentes(){
+    try {
+      const { data, error } = await sb
+        .from('recados')
+        .select('*')
+        .gt('id', baselineId)
+        .order('id', { ascending: true });
+      if (error) throw error;
+      if (data) data.forEach(enfileirar);
+    } catch (e) { console.error('Falha na varredura de pendentes', e); }
+  }
+
+  // Pequena janela de espera antes de começar a exibir, usada só quando a
+  // tela está ociosa. Se vários aparelhos mandarem recado quase ao mesmo
+  // tempo, essa pausa dá tempo de todos chegarem e entrarem na fila antes
+  // de a exibição começar — assim a ordem sai certa (pelo id, que é a
+  // ordem real de chegada no banco) mesmo que a rede entregue um recado
+  // um pouco antes do outro.
+  const JANELA_AGRUPAMENTO_MS = 700;
+  let aguardandoLote = false;
+
+  // Adiciona um recado à fila, evitando duplicatas (via o Set "vistos") e
+  // mantendo a ordem pelo id (gerado pelo banco na ordem real de chegada —
+  // mais confiável do que confiar no relógio de cada aparelho, que pode
+  // estar dessincronizado). Reordena a fila a cada novo recado, então
+  // mesmo que dois cheguem fora de ordem, saem na tela em ordem certa.
+  function enfileirar(data){
+    if (vistos.has(data.id)) return;
+    vistos.add(data.id);
+    fila.push(data);
+    fila.sort((a, b) => a.id - b.id);
+
+    if (!emExibicao && !aguardandoLote){
+      aguardandoLote = true;
+      setTimeout(() => { aguardandoLote = false; processarFila(); }, JANELA_AGRUPAMENTO_MS);
+    }
+  }
+
+  function processarFila(){
+    if (fila.length === 0) return;
+    const proximo = fila.shift();
+    mostrarRecado(proximo);
+  }
+
+  const idleEl = document.getElementById('idle');
+  const cardWrap = document.getElementById('cardWrap');
+  const msgTexto = document.getElementById('msgTexto');
+  const msgFoto = document.getElementById('msgFoto');
+  const progressBar = document.getElementById('progressBar');
+
+  let emExibicao = false;
+
+  function mostrarRecado(data){
+    emExibicao = true;
+    idleEl.style.display = 'none';
+
+    if (data.tipo === 'texto'){
+      msgTexto.style.display = 'block';
+      msgFoto.style.display = 'none';
+      msgTexto.textContent = data.conteudo;
+    } else {
+      msgTexto.style.display = 'none';
+      msgFoto.style.display = 'block';
+      msgFoto.src = data.conteudo;
+    }
+
+    cardWrap.classList.remove('hide');
+    cardWrap.classList.add('show');
+
+    // barra de progresso: 20s escorrendo de 100% a 0%
+    progressBar.style.transition = 'none';
+    progressBar.style.width = '100%';
+    // força reflow antes de iniciar a transição
+    void progressBar.offsetWidth;
+    progressBar.style.transition = 'width 20s linear';
+    progressBar.style.width = '0%';
+
+    setTimeout(esconderRecado, 20000);
+  }
+
+  function esconderRecado(){
+    cardWrap.classList.remove('show');
+    cardWrap.classList.add('hide');
+
+    setTimeout(() => {
+      cardWrap.classList.remove('hide');
+      cardWrap.style.display = 'none';
+      void cardWrap.offsetWidth;
+      cardWrap.style.display = '';
+      idleEl.style.display = 'flex';
+      emExibicao = false;
+      if (fila.length > 0){
+        setTimeout(processarFila, 350);
+      }
+    }, 350);
+  }
+</script>
+</body>
+</html>
