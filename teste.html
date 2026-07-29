@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste de carga — recados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#120B0E;
+    --bg-glow: radial-gradient(circle at 50% 0%, #2a1610 0%, #120B0E 55%);
+    --paper:#EDE6D6;
+    --amber:#E8933A;
+    --amber-dim:#8a5a26;
+    --muted:#9c8f80;
+    --text:#EDE6D6;
+    --ok:#7fbf7f;
+    --err:#d97a7a;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg-glow);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    min-height:100vh;
+    padding:24px;
+  }
+  .stage{width:100%; max-width:560px;}
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--amber);
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{
+    content:""; width:7px; height:7px; border-radius:50%;
+    background:var(--amber); box-shadow:0 0 8px 2px var(--amber);
+  }
+  h1{
+    font-family:'Fraunces', serif; font-weight:600;
+    font-size:clamp(24px, 5vw, 32px); line-height:1.15; margin:0 0 8px;
+  }
+  .sub{color:var(--muted); font-size:14px; margin-bottom:26px; line-height:1.5;}
+  .card{
+    background:rgba(237,230,214,0.04);
+    border:1px solid rgba(237,230,214,0.14);
+    border-radius:14px; padding:22px; margin-bottom:16px;
+  }
+  .row{display:flex; gap:12px; margin-bottom:14px;}
+  .row > div{flex:1;}
+  label{
+    display:block; font-size:12px; color:var(--muted);
+    margin-bottom:6px; font-family:'JetBrains Mono', monospace;
+    letter-spacing:.03em;
+  }
+  input[type="number"], select{
+    width:100%; padding:11px 12px; border-radius:9px;
+    border:1px solid rgba(237,230,214,0.14);
+    background:rgba(0,0,0,0.25); color:var(--text);
+    font-family:'Inter', sans-serif; font-size:14.5px;
+  }
+  input:focus, select:focus{outline:none; border-color:var(--amber);}
+  .toggle-row{
+    display:flex; align-items:center; gap:10px;
+    font-size:13.5px; color:var(--muted); margin-bottom:14px;
+  }
+  .toggle-row input{accent-color:var(--amber); width:17px; height:17px;}
+  button{
+    width:100%; padding:14px; border:none; border-radius:10px;
+    font-weight:600; font-size:15px; font-family:'Inter', sans-serif;
+    cursor:pointer; margin-top:4px;
+  }
+  #btnDisparar{background:var(--amber); color:#1a1108;}
+  #btnDisparar:disabled{opacity:.5; cursor:not-allowed;}
+  #btnLimpar{background:transparent; border:1px solid rgba(217,122,122,0.4); color:var(--err); margin-top:10px;}
+  .resumo{
+    display:flex; gap:14px; margin-top:16px;
+    font-family:'JetBrains Mono', monospace; font-size:13px;
+  }
+  .resumo b{display:block; font-size:20px;}
+  .resumo .ok b{color:var(--ok);}
+  .resumo .err b{color:var(--err);}
+  .resumo .total b{color:var(--text);}
+  #log{
+    margin-top:16px; max-height:260px; overflow-y:auto;
+    font-family:'JetBrains Mono', monospace; font-size:12px;
+    background:rgba(0,0,0,0.3); border-radius:10px; padding:12px;
+    line-height:1.6;
+  }
+  #log .l-ok{color:var(--ok);}
+  #log .l-err{color:var(--err);}
+  #log .l-info{color:var(--muted);}
+  .hint{font-size:12px; color:#6b6055; line-height:1.6; margin-top:8px;}
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="eyebrow">Ferramenta de teste</div>
+    <h1>Simulador de bar lotado</h1>
+    <p class="sub">Dispara várias mensagens de teste (texto e foto) ao mesmo tempo ou espalhadas, pra você testar se a tela aguenta o tranco antes do evento de verdade. Todas as mensagens de teste vêm marcadas com "TESTE" no número do adesivo, pra dar pra apagar depois com um clique.</p>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Quantidade de mensagens</label>
+          <input type="number" id="qtd" value="12" min="1" max="200">
+        </div>
+        <div>
+          <label>% de fotos</label>
+          <input type="number" id="pctFoto" value="30" min="0" max="100">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Modo de disparo</label>
+          <select id="modo">
+            <option value="junto">Tudo ao mesmo tempo (estresse máximo)</option>
+            <option value="espalhado" selected>Espalhado (mais realista)</option>
+          </select>
+        </div>
+        <div id="wrapIntervalo">
+          <label>Intervalo entre envios (ms)</label>
+          <input type="number" id="intervalo" value="300" min="0" max="5000">
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <input type="checkbox" id="comIdent" checked>
+        <span>Incluir identificação (número/nome/insta) em parte das mensagens, como pessoas reais fariam</span>
+      </div>
+
+      <button id="btnDisparar">Disparar teste</button>
+      <button id="btnLimpar">Apagar todas as mensagens de teste</button>
+
+      <div class="resumo" id="resumo" style="display:none;">
+        <div class="total"><b id="rTotal">0</b>enviadas</div>
+        <div class="ok"><b id="rOk">0</b>ok</div>
+        <div class="err"><b id="rErr">0</b>falhas</div>
+      </div>
+
+      <div id="log"></div>
+      <p class="hint">Abra o tela.html e/ou tela2.html em outra aba (ou outro aparelho) antes de disparar, pra acompanhar ao vivo se tudo aparece, na ordem certa, sem travar ou pular nenhuma.</p>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const MARCADOR_TESTE = 'TESTE'; // vai no campo "numero" de toda mensagem de teste
+
+  const nomesFalsos = ['Ana', 'Bruno', 'Carla', 'Diego', 'Elis', 'Fábio', 'Gabi', 'Hugo', 'Ivi', 'Léo'];
+  const instasFalsos = ['@ana.silva', '@bruno_costa', '@carlinha', '@diegogo', '@elis.moraes', '@fabinho'];
+  const fraseTeste = [
+    'Só testando se aparece certinho na tela!',
+    'Mensagem de teste, ignorar por favor.',
+    'Testando o sistema antes da festa 🎉',
+    'Isso é só uma simulação de carga.',
+    'Teste rápido pra ver se a fila segura.',
+    'Recado de teste — várias pessoas ao mesmo tempo.',
+    'Verificando se a foto carrega junto com o texto.',
+    'Teste automático de estresse do sistema.'
+  ];
+
+  function gerarFotoTeste(n){
+    const canvas = document.createElement('canvas');
+    canvas.width = 480; canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+    const cores = ['#E8933A', '#5c1f1f', '#3a6ea5', '#4a7c59', '#8B5CF6'];
+    ctx.fillStyle = cores[n % cores.length];
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 42px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('TESTE #' + n, canvas.width / 2, canvas.height / 2);
+    return canvas.toDataURL('image/jpeg', 0.7);
+  }
+
+  function gerarMensagem(n, pctFoto, comIdent){
+    const ehFoto = (Math.random() * 100) < pctFoto;
+    const payload = ehFoto
+      ? { tipo: 'foto', conteudo: gerarFotoTeste(n) }
+      : { tipo: 'texto', conteudo: '[TESTE #' + n + '] ' + fraseTeste[n % fraseTeste.length] };
+
+    payload.numero = MARCADOR_TESTE;
+
+    if (comIdent && Math.random() < 0.6){
+      if (Math.random() < 0.8) payload.nome = nomesFalsos[n % nomesFalsos.length];
+      if (Math.random() < 0.5) payload.instagram = instasFalsos[n % instasFalsos.length];
+    }
+
+    return payload;
+  }
+
+  const logEl = document.getElementById('log');
+  function log(msg, cls){
+    const div = document.createElement('div');
+    div.className = cls || 'l-info';
+    div.textContent = msg;
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  const btnDisparar = document.getElementById('btnDisparar');
+  const btnLimpar = document.getElementById('btnLimpar');
+  const resumoEl = document.getElementById('resumo');
+  const rTotal = document.getElementById('rTotal');
+  const rOk = document.getElementById('rOk');
+  const rErr = document.getElementById('rErr');
+  const modoEl = document.getElementById('modo');
+  const wrapIntervalo = document.getElementById('wrapIntervalo');
+
+  modoEl.addEventListener('change', () => {
+    wrapIntervalo.style.display = modoEl.value === 'espalhado' ? 'block' : 'none';
+  });
+
+  async function enviarUma(n, pctFoto, comIdent){
+    const payload = gerarMensagem(n, pctFoto, comIdent);
+    try {
+      const { error } = await sb.from('recados').insert(payload);
+      if (error) throw error;
+      log('✓ #' + n + ' enviada (' + payload.tipo + (payload.nome ? ', ' + payload.nome : '') + ')', 'l-ok');
+      return true;
+    } catch (e) {
+      log('✗ #' + n + ' falhou: ' + (e.message || e), 'l-err');
+      return false;
+    }
+  }
+
+  btnDisparar.addEventListener('click', async () => {
+    const qtd = Math.max(1, Math.min(200, parseInt(document.getElementById('qtd').value) || 1));
+    const pctFoto = Math.max(0, Math.min(100, parseInt(document.getElementById('pctFoto').value) || 0));
+    const modo = modoEl.value;
+    const intervalo = Math.max(0, parseInt(document.getElementById('intervalo').value) || 0);
+    const comIdent = document.getElementById('comIdent').checked;
+
+    btnDisparar.disabled = true;
+    logEl.innerHTML = '';
+    resumoEl.style.display = 'flex';
+    rTotal.textContent = 0; rOk.textContent = 0; rErr.textContent = 0;
+
+    log('Disparando ' + qtd + ' mensagens (' + (modo === 'junto' ? 'tudo ao mesmo tempo' : 'espalhadas a cada ' + intervalo + 'ms') + ')...', 'l-info');
+
+    let ok = 0, err = 0;
+
+    if (modo === 'junto') {
+      const promessas = [];
+      for (let i = 1; i <= qtd; i++) {
+        promessas.push(enviarUma(i, pctFoto, comIdent).then(sucesso => {
+          rTotal.textContent = parseInt(rTotal.textContent) + 1;
+          if (sucesso) { ok++; rOk.textContent = ok; } else { err++; rErr.textContent = err; }
+        }));
+      }
+      await Promise.all(promessas);
+    } else {
+      for (let i = 1; i <= qtd; i++) {
+        const sucesso = await enviarUma(i, pctFoto, comIdent);
+        rTotal.textContent = parseInt(rTotal.textContent) + 1;
+        if (sucesso) { ok++; rOk.textContent = ok; } else { err++; rErr.textContent = err; }
+        if (intervalo > 0 && i < qtd) await new Promise(r => setTimeout(r, intervalo));
+      }
+    }
+
+    log('Concluído: ' + ok + ' ok, ' + err + ' falhas.', 'l-info');
+    btnDisparar.disabled = false;
+  });
+
+  btnLimpar.addEventListener('click', async () => {
+    if (!confirm('Apagar TODAS as mensagens marcadas como teste (adesivo = "TESTE")? Isso não afeta recados reais.')) return;
+    btnLimpar.disabled = true;
+    try {
+      const { error, count } = await sb.from('recados').delete({ count: 'exact' }).eq('numero', MARCADOR_TESTE);
+      if (error) throw error;
+      log('Mensagens de teste apagadas.', 'l-ok');
+    } catch (e) {
+      log('Erro ao apagar: ' + (e.message || e), 'l-err');
+    } finally {
+      btnLimpar.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
