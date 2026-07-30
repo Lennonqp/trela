@@ -107,29 +107,29 @@
   #cardWrap{
     position:relative;
     display:none;
-    max-width:620px;
-    max-width:min(82vw, 620px);
+    max-width:1200px;
+    max-width:min(94vw, 1200px);
   }
   #cardWrap.show{display:block;}
  
   .sparkle{
     position:absolute;
-    width:16px; height:16px;
+    width:26px; height:26px;
     opacity:0;
     animation:twinkle 2.4s ease-in-out infinite;
   }
   @keyframes twinkle{0%,100%{opacity:0; transform:scale(.5) rotate(0deg);}50%{opacity:1; transform:scale(1) rotate(20deg);}}
-  .s1{top:-14px; left:-10px; animation-delay:.1s;}
-  .s2{top:-20px; right:18%; animation-delay:.9s;}
-  .s3{bottom:-12px; right:-12px; animation-delay:.5s;}
-  .s4{bottom:22%; left:-18px; animation-delay:1.4s;}
+  .s1{top:-20px; left:-16px; animation-delay:.1s;}
+  .s2{top:-28px; right:18%; animation-delay:.9s;}
+  .s3{bottom:-18px; right:-18px; animation-delay:.5s;}
+  .s4{bottom:22%; left:-26px; animation-delay:1.4s;}
  
   #card{
     position:relative;
     background:linear-gradient(160deg, #2A1650, #1C0F38);
     border:1.5px solid rgba(255,246,236,0.1);
-    border-radius:28px;
-    padding:8px;
+    border-radius:32px;
+    padding:10px;
     box-shadow:0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.15);
     transform:scale(.4) rotate(-4deg);
     opacity:0;
@@ -151,9 +151,9 @@
   }
  
   #progressTrack{
-    height:6px; border-radius:100px;
+    height:8px; border-radius:100px;
     background:rgba(255,246,236,0.1);
-    margin:10px 10px 0;
+    margin:14px 14px 0;
     overflow:hidden;
   }
   #progressBar{
@@ -164,24 +164,23 @@
   }
  
   .card-inner{
-    padding:38px 34px 32px;
+    padding:70px 64px 58px;
     text-align:center;
   }
   .eyebrow-card{
     display:inline-flex; align-items:center; gap:6px;
     font-family:'Unbounded', sans-serif; font-weight:700;
-    font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    font-size:16px; letter-spacing:.06em; text-transform:uppercase;
     color:#160B2E;
     background:#FFB238;
-    padding:6px 14px; border-radius:100px;
-    margin-bottom:20px;
+    padding:8px 18px; border-radius:100px;
+    margin-bottom:32px;
   }
   #msgTexto{
     font-family:'Plus Jakarta Sans', sans-serif;
     font-weight:700;
-    font-size:26px;
-    font-size:clamp(21px, 3.2vw, 30px);
-    line-height:1.4;
+    font-size:clamp(32px, 5vw, 60px);
+    line-height:1.35;
     margin:0;
     color:#FFF6EC;
     word-wrap:break-word;
@@ -189,13 +188,13 @@
   #msgFoto{
     display:none;
     max-width:100%;
-    max-height:60vh;
-    border-radius:16px;
+    max-height:78vh;
+    border-radius:20px;
   }
   #identRecado{
     display:none;
-    margin-top:16px;
-    font-size:12.5px;
+    margin-top:26px;
+    font-size:18px;
     font-weight:600;
     letter-spacing:.02em;
     color:#C9BEF0;
